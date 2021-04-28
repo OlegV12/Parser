@@ -1,5 +1,6 @@
 import time
 import typing
+import datetime
 
 import requests
 from urllib.parse import urljoin
@@ -75,6 +76,7 @@ class GbBlogParse:
         img = str(blog_content.find("img")['src'])
         date = soup.find("div", attrs={"class": "blogpost-date-views"})
         date_time = date.find("time")['datetime']
+        date_time_obj = datetime.datetime.strptime(date_time, '%Y-%m-%dT%H:%M:%S%z')
         author = soup.find("div", attrs={"itemprop": "author"})
         post_id = soup.find("comments").attrs.get("commentable-id")
         comment_api = f"/api/v2/comments?commentable_type=Post&commentable_id={post_id}&order=desc"
@@ -84,11 +86,10 @@ class GbBlogParse:
             "url": url,
             "title": title_tag.text,
             "img": img,
-            "post_datetime": date_time,
+            "post_datetime": date_time_obj,
             "author": author.text,
             "author_url": urljoin(url, author.parent.attrs.get("href")),
-
-            "comment": self.get_comment(comment_data)}
+            "comment": self.get_comment(comment_data)},
         return data
 
     def run(self):
